@@ -1,0 +1,261 @@
+<div class="container">
+  <mat-card class="main-card">
+    <mat-card-header>
+      <mat-card-title>GitHub Repository Manager</mat-card-title>
+      <mat-card-subtitle>Create and manage environment repositories with XML files</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-stepper #stepper [linear]="true" [selectedIndex]="currentStep">
+        <!-- Step 1: Environment URLs -->
+        <mat-step [completed]="currentStep > 0">
+          <ng-template matStepLabel>Environment URLs</ng-template>
+          <form [formGroup]="basicInfoForm" class="form-container">
+            <h3>Enter URLs for each environment</h3>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Development Environment URL</mat-label>
+              <input matInput formControlName="devUrl" placeholder="https://dev-api.example.com">
+              <mat-error *ngIf="basicInfoForm.get('devUrl')?.invalid">Please enter a valid URL</mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>QA Environment URL</mat-label>
+              <input matInput formControlName="qaUrl" placeholder="https://qa-api.example.com">
+              <mat-error *ngIf="basicInfoForm.get('qaUrl')?.invalid">Please enter a valid URL</mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Staging Environment URL</mat-label>
+              <input matInput formControlName="stageUrl" placeholder="https://stage-api.example.com">
+              <mat-error *ngIf="basicInfoForm.get('stageUrl')?.invalid">Please enter a valid URL</mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Production Environment URL</mat-label>
+              <input matInput formControlName="prodUrl" placeholder="https://prod-api.example.com">
+              <mat-error *ngIf="basicInfoForm.get('prodUrl')?.invalid">Please enter a valid URL</mat-error>
+            </mat-form-field>
+            
+            <div class="button-container">
+              <button mat-raised-button color="primary" (click)="nextStep()" [disabled]="basicInfoForm.invalid">
+                Continue
+              </button>
+            </div>
+          </form>
+        </mat-step>
+        
+        <!-- Step 2: GitHub Information -->
+        <mat-step [completed]="currentStep > 1">
+          <ng-template matStepLabel>GitHub Settings</ng-template>
+          <form [formGroup]="githubInfoForm" class="form-container">
+            <h3>GitHub Repository Information</h3>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>GitHub Username</mat-label>
+              <input matInput formControlName="githubUsername" placeholder="your-github-username">
+              <mat-error *ngIf="githubInfoForm.get('githubUsername')?.invalid">Username is required</mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>GitHub Personal Access Token</mat-label>
+              <input matInput type="password" formControlName="githubToken" placeholder="ghp_xxxxxxxxxxxx">
+              <mat-hint>Token needs repo and user permissions</mat-hint>
+              <mat-error *ngIf="githubInfoForm.get('githubToken')?.invalid">GitHub token is required</mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Base GitHub URL</mat-label>
+              <input matInput formControlName="baseRepoUrl" placeholder="https://github.com/your-username">
+              <mat-error *ngIf="githubInfoForm.get('baseRepoUrl')?.invalid">Please enter a valid URL</mat-error>
+            </mat-form-field>
+            
+            <div *ngIf="environments.length > 0" class="environments-table">
+              <h3>Environment Repositories to be Created</h3>
+              <table mat-table [dataSource]="environments" class="mat-elevation-z2">
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef>Environment</th>
+                  <td mat-cell *matCellDef="let env">{{env.name}}</td>
+                </ng-container>
+                
+                <!-- URL Column -->
+                <ng-container matColumnDef="url">
+                  <th mat-header-cell *matHeaderCellDef>API URL</th>
+                  <td mat-cell *matCellDef="let env">{{env.url}}</td>
+                </ng-container>
+                
+                <!-- Repo Name Column -->
+                <ng-container matColumnDef="repoName">
+                  <th mat-header-cell *matHeaderCellDef>Repository Name</th>
+                  <td mat-cell *matCellDef="let env">{{env.repoName}}</td>
+                </ng-container>
+                
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let env">
+                    <mat-chip [color]="env.status === 'error' ? 'warn' : 
+                      (env.status === 'completed' ? 'accent' : 
+                      (env.status === 'created' ? 'primary' : 'default'))" 
+                      [selected]="env.status !== 'pending'">
+                      {{env.status}}
+                    </mat-chip>
+                  </td>
+                </ng-container>
+                
+                <!-- XML Count Column -->
+                <ng-container matColumnDef="xmlCount">
+                  <th mat-header-cell *matHeaderCellDef>XMLs</th>
+                  <td mat-cell *matCellDef="let env">{{env.xmlCount || '-'}}</td>
+                </ng-container>
+                
+                <!-- Version Column -->
+                <ng-container matColumnDef="version">
+                  <th mat-header-cell *matHeaderCellDef>Version</th>
+                  <td mat-cell *matCellDef="let env">{{env.version || '-'}}</td>
+                </ng-container>
+                
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <td mat-cell *matCellDef="let env">
+                    <a *ngIf="env.repoUrl" mat-icon-button color="primary" [href]="env.repoUrl" target="_blank">
+                      <mat-icon>open_in_new</mat-icon>
+                    </a>
+                  </td>
+                </ng-container>
+                
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>
+            </div>
+            
+            <div class="button-container">
+              <button mat-button matStepperPrevious>Back</button>
+              <button mat-raised-button color="primary" (click)="nextStep()" [disabled]="githubInfoForm.invalid">
+                Create Repositories
+              </button>
+            </div>
+          </form>
+        </mat-step>
+        
+        <!-- Step 3: API Information for XMLs -->
+        <mat-step [completed]="currentStep > 2">
+          <ng-template matStepLabel>XML API Settings</ng-template>
+          <form [formGroup]="apiInfoForm" class="form-container">
+            <h3>XML API Information</h3>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>XML API URL</mat-label>
+              <input matInput formControlName="xmlApiUrl" placeholder="https://api.example.com/xmls">
+              <mat-hint>The API should return ~50 XMLs per environment</mat-hint>
+              <mat-error *ngIf="apiInfoForm.get('xmlApiUrl')?.invalid">Please enter a valid URL</mat-error>
+            </mat-form-field>
+            
+            <div class="button-container">
+              <button mat-button matStepperPrevious>Back</button>
+              <button mat-raised-button color="primary" (click)="nextStep()" [disabled]="apiInfoForm.invalid">
+                Fetch & Commit XMLs
+              </button>
+            </div>
+          </form>
+        </mat-step>
+        
+        <!-- Step 4: Create Versions -->
+        <mat-step>
+          <ng-template matStepLabel>Create Versions</ng-template>
+          <div class="form-container">
+            <h3>Create Version V1 for Each Repository</h3>
+            <p>Click the button below to create V1 tags for all repositories</p>
+            
+            <div class="button-container">
+              <button mat-button matStepperPrevious>Back</button>
+              <button mat-raised-button color="primary" (click)="nextStep()">
+                Create V1 Tags
+              </button>
+            </div>
+          </div>
+        </mat-step>
+        
+        <!-- Final Step: Summary -->
+        <mat-step>
+          <ng-template matStepLabel>Summary</ng-template>
+          <div class="form-container">
+            <h3>Process Complete</h3>
+            <p>All repositories have been created and configured with XMLs and version tags.</p>
+            
+            <div class="environments-table">
+              <h3>Environment Repositories Summary</h3>
+              <table mat-table [dataSource]="environments" class="mat-elevation-z2">
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef>Environment</th>
+                  <td mat-cell *matCellDef="let env">{{env.name}}</td>
+                </ng-container>
+                
+                <!-- URL Column -->
+                <ng-container matColumnDef="url">
+                  <th mat-header-cell *matHeaderCellDef>API URL</th>
+                  <td mat-cell *matCellDef="let env">{{env.url}}</td>
+                </ng-container>
+                
+                <!-- Repo Name Column -->
+                <ng-container matColumnDef="repoName">
+                  <th mat-header-cell *matHeaderCellDef>Repository Name</th>
+                  <td mat-cell *matCellDef="let env">{{env.repoName}}</td>
+                </ng-container>
+                
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let env">
+                    <mat-chip [color]="env.status === 'error' ? 'warn' : 
+                      (env.status === 'completed' ? 'accent' : 
+                      (env.status === 'created' ? 'primary' : 'default'))" 
+                      [selected]="env.status !== 'pending'">
+                      {{env.status}}
+                    </mat-chip>
+                  </td>
+                </ng-container>
+                
+                <!-- XML Count Column -->
+                <ng-container matColumnDef="xmlCount">
+                  <th mat-header-cell *matHeaderCellDef>XMLs</th>
+                  <td mat-cell *matCellDef="let env">{{env.xmlCount || '-'}}</td>
+                </ng-container>
+                
+                <!-- Version Column -->
+                <ng-container matColumnDef="version">
+                  <th mat-header-cell *matHeaderCellDef>Version</th>
+                  <td mat-cell *matCellDef="let env">{{env.version || '-'}}</td>
+                </ng-container>
+                
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <td mat-cell *matCellDef="let env">
+                    <a *ngIf="env.repoUrl" mat-icon-button color="primary" [href]="env.repoUrl" target="_blank">
+                      <mat-icon>open_in_new</mat-icon>
+                    </a>
+                  </td>
+                </ng-container>
+                
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>
+            </div>
+            
+            <div class="button-container">
+              <button mat-raised-button color="warn" (click)="reset()">
+                Start Over
+              </button>
+            </div>
+          </div>
+        </mat-step>
+      </mat-stepper>
+      
+      <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
+    </mat-card-content>
+  </mat-card>
+</div>

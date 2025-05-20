@@ -1,0 +1,107 @@
+<div class="container">
+  <h1>GitHub Repository XML Manager</h1>
+  
+  <div class="process-indicator">
+    <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
+      <div class="step-icon">1</div>
+      <div class="step-label">GitHub Setup</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">
+      <div class="step-icon">2</div>
+      <div class="step-label">Create Repositories</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">
+      <div class="step-icon">3</div>
+      <div class="step-label">Add XML Files</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 4" [class.completed]="currentStep > 4">
+      <div class="step-icon">4</div>
+      <div class="step-label">Create V1 Tags</div>
+    </div>
+  </div>
+  
+  <!-- GitHub Setup Section -->
+  <div class="setup-section">
+    <h2>Setup GitHub Connection</h2>
+    
+    <div class="form-group">
+      <label for="githubUsername">GitHub Username</label>
+      <input type="text" id="githubUsername" [(ngModel)]="githubUsername" placeholder="Enter your GitHub username">
+    </div>
+    
+    <div class="form-group">
+      <label for="githubToken">GitHub Personal Access Token</label>
+      <input type="password" id="githubToken" [(ngModel)]="githubToken" placeholder="Enter your GitHub token">
+      <small>This token needs repo and user permissions.</small>
+    </div>
+    
+    <button class="btn btn-primary" (click)="setGithubToken()">Set Token</button>
+  </div>
+  
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <button class="btn btn-success" (click)="createRepositories()" [disabled]="!githubService.getToken() || !githubUsername">
+      Create All Repositories
+    </button>
+    
+    <button class="btn btn-primary" (click)="fetchAndCommitAllXmls()" [disabled]="!allReposCreated() || !allApisSet()">
+      Add XMLs to All Repos
+    </button>
+    
+    <button class="btn btn-warning" (click)="createAllV1Tags()" [disabled]="!allXmlsAdded()">
+      Create V1 Tags For All
+    </button>
+  </div>
+  
+  <!-- Messages and Loading -->
+  <div *ngIf="message" class="message success-message">
+    {{ message }}
+  </div>
+  
+  <div *ngIf="error" class="message error-message">
+    {{ error }}
+  </div>
+  
+  <div *ngIf="loading" class="loading-indicator">
+    <span class="loading"></span> {{loadingMessage || 'Processing...'}}
+  </div>
+  
+  <!-- Environments Section -->
+  <div class="environment-section">
+    <h2>Environments</h2>
+    
+    <div *ngFor="let env of envService.getEnvironments()" class="env-card" [class.selected]="selectedEnv?.name === env.name">
+      <div class="env-header">
+        <span class="env-title">{{ env.name }}</span>
+        <span class="env-status status-{{ env.status }}">{{ env.status }}</span>
+      </div>
+      
+      <div class="env-details">
+        <div><strong>Repository Name:</strong> {{ env.repoName }}</div>
+        <div *ngIf="env.githubUrl"><strong>GitHub URL:</strong> {{ env.githubUrl }}</div>
+        <div><strong>API URL:</strong> {{ env.apiUrl || 'Not set' }}</div>
+        <div *ngIf="env.errorMessage" class="error-message"><strong>Error:</strong> {{ env.errorMessage }}</div>
+      </div>
+      
+      <div class="form-group" *ngIf="selectedEnv?.name === env.name">
+        <label for="apiUrl">API URL for {{ env.name }}</label>
+        <input type="text" id="apiUrl" [(ngModel)]="apiUrl" placeholder="Enter API URL for this environment">
+        <button class="btn btn-primary" (click)="updateApiUrl()">Update API URL</button>
+      </div>
+      
+      <div class="env-actions">
+        <button class="btn btn-primary" (click)="selectEnvironment(env)">
+          Select
+        </button>
+        <button class="btn btn-info" (click)="fetchAndCommitXmls(env)" 
+                [disabled]="!env.apiUrl || !githubService.getToken() || !env.githubUrl || env.status === 'error'">
+          Fetch & Commit XMLs
+        </button>
+        <button class="btn btn-warning" (click)="createV1Tag(env)"
+                [disabled]="!githubService.getToken() || env.status !== 'xmlsAdded'">
+          Create V1 Tag
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

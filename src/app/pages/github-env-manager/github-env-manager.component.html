@@ -1,0 +1,173 @@
+<div class="container">
+  <h1>GitHub Environment Manager</h1>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+    <button class="close-btn" (click)="resetStatus()">×</button>
+  </div>
+  
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+    <button class="close-btn" (click)="resetStatus()">×</button>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>GitHub Settings</h2>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="githubForm" (ngSubmit)="saveGithubSettings()">
+        <div class="form-group">
+          <label for="githubUrl">GitHub URL (e.g., https://github.com/username)</label>
+          <input 
+            type="text" 
+            id="githubUrl" 
+            formControlName="githubUrl" 
+            class="form-control" 
+            placeholder="Enter your GitHub URL"
+          >
+          <div *ngIf="githubForm.get('githubUrl')?.invalid && githubForm.get('githubUrl')?.touched" class="error-message">
+            GitHub URL is required
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="githubToken">GitHub Personal Access Token</label>
+          <input 
+            type="password" 
+            id="githubToken" 
+            formControlName="githubToken" 
+            class="form-control"
+            placeholder="Enter your GitHub token"
+          >
+          <div *ngIf="githubForm.get('githubToken')?.invalid && githubForm.get('githubToken')?.touched" class="error-message">
+            GitHub token is required
+          </div>
+          <small class="form-text text-muted">
+            Your token needs repo and workflow permissions. 
+            <a href="https://github.com/settings/tokens/new" target="_blank">Create token</a>
+          </small>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" [disabled]="githubForm.invalid">
+          Save GitHub Settings
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-header">
+      <h2>Environment Settings</h2>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="environmentForm" (ngSubmit)="saveEnvironmentSettings()">
+        <div class="environments">
+          <div *ngFor="let env of environments" class="environment-card">
+            <h3>{{ env.name }}</h3>
+            
+            <div class="form-group">
+              <label [for]="env.name + 'ApiUrl'">API URL for XMLs</label>
+              <input 
+                type="text" 
+                [id]="env.name + 'ApiUrl'" 
+                [formControlName]="env.name + 'ApiUrl'" 
+                class="form-control"
+                placeholder="URL to fetch XMLs for this environment"
+              >
+            </div>
+            
+            <div class="form-group">
+              <label [for]="env.name + 'RepoName'">Repository Name</label>
+              <input 
+                type="text" 
+                [id]="env.name + 'RepoName'" 
+                [formControlName]="env.name + 'RepoName'" 
+                class="form-control"
+                placeholder="GitHub repository name"
+              >
+            </div>
+
+            <!-- Folder Selection and Promotion UI -->
+            <div *ngIf="env.name !== 'Dev' && env.repoName" class="promotion-section">
+              <div class="form-group">
+                <label [for]="env.name + 'FolderSelect'">Select Folder to Promote</label>
+                <select 
+                  [id]="env.name + 'FolderSelect'"
+                  [(ngModel)]="env.selectedFolder"
+                  class="form-control"
+                  [disabled]="!env.availableFolders?.length"
+                >
+                  <option value="">Select a folder</option>
+                  <option *ngFor="let folder of env.availableFolders" [value]="folder">
+                    {{ folder }}
+                  </option>
+                </select>
+              </div>
+
+              <div *ngIf="env.sourceEnvironment" class="source-info">
+                Source: {{ env.sourceEnvironment }}
+              </div>
+
+              <button 
+                class="btn btn-primary"
+                [disabled]="!env.selectedFolder || env.status === 'promoting'"
+                (click)="promoteFolder(env)"
+              >
+                <span *ngIf="env.status === 'promoting'">Promoting...</span>
+                <span *ngIf="env.status !== 'promoting'">Promote Folder</span>
+              </button>
+            </div>
+            
+            <div class="status-badge" [ngClass]="env.status">
+              Status: {{ env.status || 'Not started' }}
+              <span *ngIf="env.xmlCount">({{ env.xmlCount }} XMLs)</span>
+              <span *ngIf="env.version">({{ env.version }})</span>
+            </div>
+
+            <div *ngIf="env.errorMessage" class="error-info">
+              {{ env.errorMessage }}
+            </div>
+            
+            <div *ngIf="env.repoUrl" class="repo-link">
+              <a [href]="env.repoUrl" target="_blank">View Repository</a>
+            </div>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" [disabled]="environmentForm.invalid">
+          Save Environment Settings
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="action-buttons mt-4">
+    <button 
+      class="btn btn-success" 
+      [disabled]="isCreatingRepos || !githubService.getToken()" 
+      (click)="createRepositories()"
+    >
+      <span *ngIf="isCreatingRepos">Processing...</span>
+      Step 1: Create Repositories
+    </button>
+    
+    <button 
+      class="btn btn-success" 
+      [disabled]="isAddingXmls || !githubService.getToken()" 
+      (click)="addXmlsToRepositories()"
+    >
+      <span *ngIf="isAddingXmls">Processing...</span>
+      Step 2: Add XMLs to Repositories
+    </button>
+    
+    <button 
+      class="btn btn-success" 
+      [disabled]="isCreatingVersions || !githubService.getToken()" 
+      (click)="createV1Versions()"
+    >
+      <span *ngIf="isCreatingVersions">Processing...</span>
+      Step 3: Create V1 Tags
+    </button>
+  </div>
+</div>
