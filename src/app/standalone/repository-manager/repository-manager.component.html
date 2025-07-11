@@ -1,0 +1,121 @@
+<div class="container">
+  <h1>GitHub Repository XML Manager</h1>
+  
+  <div class="process-indicator">
+    <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
+      <div class="step-icon">1</div>
+      <div class="step-label">GitHub Setup</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">
+      <div class="step-icon">2</div>
+      <div class="step-label">Create Repositories</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">
+      <div class="step-icon">3</div>
+      <div class="step-label">Add XML Files</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 4" [class.completed]="currentStep > 4">
+      <div class="step-icon">4</div>
+      <div class="step-label">Create V1 Tags</div>
+    </div>
+  </div>
+  
+  <!-- GitHub Setup Section -->
+  <div class="setup-section">
+    <h2>Setup GitHub Connection</h2>
+    
+    <form [formGroup]="githubForm" (ngSubmit)="setGithubToken()">
+      <div class="form-group">
+        <label for="githubUsername">GitHub Username</label>
+        <input type="text" id="githubUsername" formControlName="githubUsername" placeholder="Enter your GitHub username">
+        <div class="error-message" *ngIf="githubForm.get('githubUsername')?.touched && githubForm.get('githubUsername')?.invalid">
+          GitHub username is required
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="githubToken">GitHub Personal Access Token</label>
+        <input type="password" id="githubToken" formControlName="githubToken" placeholder="Enter your GitHub token">
+        <small>This token needs repo and user permissions.</small>
+        <div class="error-message" *ngIf="githubForm.get('githubToken')?.touched && githubForm.get('githubToken')?.invalid">
+          GitHub token is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="githubUrl">GitHub URL</label>
+        <input type="text" id="githubUrl" formControlName="githubUrl" placeholder="https://github.com/username">
+        <div class="error-message" *ngIf="githubForm.get('githubUrl')?.touched && githubForm.get('githubUrl')?.invalid">
+          Please enter a valid GitHub URL
+        </div>
+      </div>
+      
+      <button type="submit" class="btn btn-primary" [disabled]="githubForm.invalid">Set Token</button>
+    </form>
+  </div>
+  
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <button class="btn btn-success" (click)="createRepositories()" 
+            [disabled]="!githubService.getToken() || !githubForm.get('githubUsername')?.value">
+      Create All Repositories
+    </button>
+  </div>
+  
+  <!-- Messages and Loading -->
+  <div *ngIf="message" class="message success-message">
+    {{ message }}
+  </div>
+  
+  <div *ngIf="error" class="message error-message">
+    {{ error }}
+  </div>
+  
+  <div *ngIf="loading" class="loading-indicator">
+    <span class="loading"></span> Processing...
+  </div>
+  
+  <!-- Environments Section -->
+  <div class="environment-section">
+    <h2>Environments</h2>
+    
+    <div *ngFor="let env of envService.getEnvironments()" class="env-card" [class.selected]="selectedEnv?.name === env.name">
+      <div class="env-header">
+        <span class="env-title">{{ env.name }}</span>
+        <span class="env-status status-{{ env.status }}">{{ env.status }}</span>
+      </div>
+      
+      <div class="env-details">
+        <div><strong>Repository Name:</strong> {{ env.repoName }}</div>
+        <div *ngIf="env.githubUrl"><strong>GitHub URL:</strong> {{ env.githubUrl }}</div>
+        <div><strong>API URL:</strong> {{ env.apiUrl || 'Not set' }}</div>
+        <div *ngIf="env.errorMessage" class="error-message"><strong>Error:</strong> {{ env.errorMessage }}</div>
+      </div>
+      
+      <div class="form-group" *ngIf="selectedEnv?.name === env.name">
+        <label for="apiUrl">API URL for {{ env.name }}</label>
+        <input type="text" id="apiUrl" formControlName="apiUrl" placeholder="Enter API URL for this environment">
+        <div class="error-message" *ngIf="githubForm.get('apiUrl')?.touched && githubForm.get('apiUrl')?.invalid">
+          Please enter a valid API URL
+        </div>
+        <button class="btn btn-primary" (click)="updateApiUrl()" [disabled]="githubForm.get('apiUrl')?.invalid">
+          Update API URL
+        </button>
+      </div>
+      
+      <div class="env-actions">
+        <button class="btn btn-primary" (click)="selectEnvironment(env)">
+          Select
+        </button>
+        <button class="btn btn-info" (click)="fetchAndCommitXmls(env)" 
+                [disabled]="!env.apiUrl || !githubService.getToken() || !env.githubUrl || env.status === 'error'">
+          Fetch & Commit XMLs
+        </button>
+        <button class="btn btn-warning" (click)="createV1Tag(env)"
+                [disabled]="!githubService.getToken() || env.status !== 'xmlsAdded'">
+          Create V1 Tag
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

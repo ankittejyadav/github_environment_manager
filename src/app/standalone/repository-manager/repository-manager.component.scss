@@ -1,0 +1,349 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 2.2rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+h2 {
+  color: #3498db;
+  margin: 1.5rem 0 1rem;
+  font-size: 1.5rem;
+}
+
+.setup-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-left: 5px solid #3498db;
+}
+
+.environment-section {
+  margin-top: 30px;
+}
+
+.env-card {
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.env-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.selected {
+  border: 2px solid #007bff;
+  background-color: #f0f7ff;
+}
+
+.env-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #e0e0e0;
+}
+
+.env-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.env-status {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-pending {
+  background-color: #ffeaa7;
+  color: #d35400;
+}
+
+.status-created {
+  background-color: #81ecec;
+  color: #00566c;
+}
+
+.status-xmlsAdded {
+  background-color: #55efc4;
+  color: #006266;
+}
+
+.status-v1Created {
+  background-color: #a29bfe;
+  color: #30336b;
+}
+
+.status-error {
+  background-color: #ff7675;
+  color: #b71540;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #2d3436;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #dfe6e9;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-success {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.btn-info {
+  background-color: #00cec9;
+  color: white;
+}
+
+.btn-warning {
+  background-color: #fdcb6e;
+  color: #2d3436;
+}
+
+.btn-danger {
+  background-color: #d63031;
+  color: white;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.message {
+  padding: 12px 15px;
+  margin: 15px 0;
+  border-radius: 6px;
+  font-size: 14px;
+  animation: fadeInOut 0.5s;
+}
+
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  border-left: 4px solid #2ecc71;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-left: 4px solid #d63031;
+}
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  margin: 15px 0;
+  background-color: #f5f6fa;
+  border-radius: 6px;
+  font-size: 16px;
+  color: #3498db;
+}
+
+.loading {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(52, 152, 219, 0.3);
+  border-radius: 50%;
+  border-top-color: #3498db;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.env-actions {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.env-details {
+  margin: 15px 0;
+  font-size: 14px;
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 3px solid #95a5a6;
+}
+
+.env-details div {
+  margin-bottom: 8px;
+  color: #34495e;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .env-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .env-status {
+    margin-top: 8px;
+  }
+  
+  .env-actions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
+
+/* Action button at the top */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  gap: 15px;
+}
+
+.action-buttons .btn {
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+/* Process indicator */
+.process-indicator {
+  display: flex;
+  justify-content: space-between;
+  margin: 30px 0;
+  position: relative;
+}
+
+.process-indicator::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 10%;
+  right: 10%;
+  height: 4px;
+  background-color: #e0e0e0;
+  z-index: 1;
+}
+
+.step {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  width: 25%;
+}
+
+.step-icon {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  color: white;
+  font-weight: bold;
+}
+
+.step.completed .step-icon {
+  background-color: #2ecc71;
+}
+
+.step.active .step-icon {
+  background-color: #3498db;
+}
+
+.step-label {
+  font-size: 12px;
+  color: #7f8c8d;
+}
+
+.step.completed .step-label,
+.step.active .step-label {
+  color: #2c3e50;
+  font-weight: bold;
+}
